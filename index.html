@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexTech Industries | Ingeniería Dinámica</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Lora:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <style>
+        :root {
+            --primary: #0a192f;
+            --accent: #64ffda; /* Verde Neón Tecnológico */
+            --text-light: #ccd6f6;
+            --text-dim: #8892b0;
+            --card-bg: rgba(17, 34, 64, 0.95);
+            --border: rgba(100, 255, 218, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* FONDO 3D */
+        #canvas-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.4; pointer-events: none;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            padding: 20px 5%;
+            background: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { color: var(--accent); font-weight: 800; letter-spacing: 1px; font-size: 1.2rem; }
+        .nav-links a { color: var(--text-light); text-decoration: none; margin-left: 30px; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* LAYOUT */
+        .container { max-width: 1000px; margin: 0 auto; padding: 120px 25px; }
+
+        /* SECCIONES */
+        section { margin-bottom: 150px; } /* Espacio para scroll */
+
+        /* HERO */
+        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+        .hero h1 { font-size: clamp(3rem, 7vw, 5rem); color: #e6f1ff; line-height: 1.1; margin-bottom: 20px; }
+        .hero p { max-width: 600px; font-size: 1.2rem; color: var(--text-dim); margin-bottom: 40px; }
+        
+        .btn-main {
+            padding: 18px 30px; border: 1px solid var(--accent); color: var(--accent);
+            background: transparent; text-decoration: none; border-radius: 4px;
+            font-family: 'Fira Code', monospace; transition: 0.3s; font-weight: 600;
+        }
+        .btn-main:hover { background: rgba(100, 255, 218, 0.1); transform: translateY(-5px); }
+
+        /* TARJETAS */
+        .glass-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            padding: 40px; border-radius: 10px; margin-bottom: 30px;
+            box-shadow: 0 10px 30px -15px rgba(2,12,27,0.7);
+        }
+        
+        h2 { color: #e6f1ff; font-size: 2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        h2::after { content: ""; display: block; width: 200px; height: 1px; background: var(--border); }
+        
+        h3 { color: var(--accent); margin: 30px 0 15px 0; font-family: 'Fira Code', monospace; font-size: 1.1rem; }
+
+        /* GRÁFICA Y DIAGRAMAS */
+        .visual-container {
+            background: #fff; border-radius: 8px; padding: 20px; margin: 30px 0;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
+            position: relative;
+        }
+        .visual-container svg { animation: float 6s ease-in-out infinite; }
+
+        /* FÓRMULAS */
+        .formula-box {
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 5px;
+            text-align: center; color: #e6f1ff; margin: 20px 0; font-size: 1.1rem;
+        }
+
+        /* QUIZ INTERACTIVO */
+        .quiz-option {
+            display: block; width: 100%; padding: 15px; margin: 10px 0;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: var(--text-light); text-align: left; cursor: pointer; border-radius: 5px;
+            transition: 0.2s;
+        }
+        .quiz-option:hover { background: rgba(100, 255, 218, 0.1); }
+        .quiz-option.correct { background: rgba(40, 167, 69, 0.2); border-color: #28a745; }
+        .quiz-option.wrong { background: rgba(220, 53, 69, 0.2); border-color: dc3545; }
+        .feedback { font-size: 0.9rem; margin-top: 5px; display: none; }
+
+        /* EQUIPO */
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .member { text-align: center; padding: 20px; border: 1px solid var(--border); border-radius: 8px; }
+        .member h4 { color: #e6f1ff; margin-bottom: 5px; }
+        .member span { color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Chart Container Size */
+        .chart-wrapper { width: 100%; height: 300px; }
+
+        @media(max-width:768px) {
+            .hero h1 { font-size: 2.5rem; }
+            nav { display: none; } /* Simple mobile fix */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <nav>
+        <div class="logo">NEXTECH.</div>
+        <div class="nav-links">
+            <a href="#empaque">01. Colisiones</a>
+            <a href="#robotica">02. Robótica</a>
+            <a href="#quiz">03. Ejercicios</a>
+            <a href="#equipo">04. Equipo</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <section class="hero">
+            <div style="color: var(--accent); margin-bottom: 20px;">Hola, somos NexTech Industries</div>
+            <h1>Optimizamos la física <br> del mundo real.</h1>
+            <p>Plataforma de simulación para la validación de procesos industriales en León, Gto. Transformamos ecuaciones en soluciones visuales.</p>
+            <a href="https://emma35015-lgtm.github.io/NexTech-Industries/" target="_blank" class="btn-main">
+                <i class="fas fa-play"></i> INICIAR SIMULADOR MAESTRO
+            </a>
+        </section>
+
+        <section id="empaque">
+            <h2>01. Caso de Estudio: Colisiones</h2>
+            
+            <div class="glass-card scroll-reveal">
+                <h3>El Reto Técnico</h3>
+                <p>PackTech Solutions sufre daños en productos debido a la energía cinética residual en choques. Nuestro objetivo es calcular el <strong>Coeficiente de Restitución (e)</strong> ideal.</p>
+            </div>
+
+            <div class="glass-card scroll-reveal">
+                <h3>Análisis Gráfico Interactivo</h3>
+                <p>Esta gráfica muestra cómo se pierde energía cinética dependiendo del material (Coeficiente e). <br><small>Elástica (e=1) vs Plástica (e=0)</small>.</p>
+                
+                <div class="visual-container" style="background: rgba(255,255,255,0.9);">
+                    <div class="chart-wrapper">
+                        <canvas id="collisionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card scroll-reveal">
+                <h3>Modelado Matemático</h3>
+                <p>Usamos la conservación de momento lineal. Observa cómo las masas interactúan en el diagrama y su fórmula correspondiente.</p>
+                
+                <div class="visual-container">
+                    <svg width="300" height="100">
+                        <circle cx="50" cy="50" r="25" fill="#0a192f" stroke="#64ffda" stroke-width="3"/>
+                        <text x="50" y="55" fill="#64ffda" text-anchor="middle" font-weight="bold">m1</text>
+                        <line x1="80" y1="50" x2="130" y2="50" stroke="#64ffda" stroke-width="2" marker-end="url(#arrow)"/>
+                        
+                        <circle cx="250" cy="50" r="30" fill="#0a192f" stroke="#ff6b6b" stroke-width="3"/>
+                        <text x="250" y="55" fill="#ff6b6b" text-anchor="middle" font-weight="bold">m2</text>
+                        <line x1="215" y1="50" x2="170" y2="50" stroke="#ff6b6b" stroke-width="2" marker-end="url(#arrow-red)"/>
+
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64ffda" /></marker>
+                            <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ff6b6b" /></marker>
+                        </defs>
+                    </svg>
+                </div>
+
+                <div class="formula-box">
+                    $$ v_{1f} = \frac{(m_1 - e m_2)v_{1i} + (1+e)m_2v_{2i}}{m_1 + m_2} $$
+                </div>
+            </div>
+        </section>
+
+        <section id="robotica">
+            <h2>02. Caso de Estudio: Robótica</h2>
+            <div class="glass-card scroll-reveal">
+                <h3>Cinemática del Brazo</h3>
+                <p>Para RoboIndustrial, optimizamos la velocidad angular ($\omega$) para evitar singularidades mecánicas.</p>
+                
+                <div class="formula-box">
+                    $$ \vec{v} = \vec{\omega} \times \vec{r} $$
+                </div>
+                
+                <div class="visual-container" style="background:#fff;">
+                    <svg width="300" height="150">
+                        <rect x="20" y="120" width="50" height="20" fill="#333"/>
+                        <line x1="45" y1="120" x2="120" y2="50" stroke="#555" stroke-width="8"/>
+                        <circle cx="45" cy="120" r="5" fill="#64ffda"/>
+                        <line x1="120" y1="50" x2="220" y2="80" stroke="#555" stroke-width="6"/>
+                        <circle cx="120" cy="50" r="5" fill="#64ffda"/>
+                        <circle cx="220" cy="80" r="8" fill="#ff6b6b"/>
+                        <text x="240" y="85" fill="#333" font-weight="bold">V</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz">
+            <h2>03. Evaluación de Conocimientos</h2>
+            <p style="margin-bottom: 20px; color: var(--text-dim);">Pon a prueba lo aprendido. Selecciona la respuesta correcta.</p>
+
+            <div class="glass-card scroll-reveal">
+                <h3>Q1. Si el coeficiente de restitución e = 0, ¿qué ocurre?</h3>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">A. Los objetos rebotan con la misma velocidad.</button>
+                <button class="quiz-option" onclick="checkAnswer(this, true)">B. Los objetos quedan pegados (Choque Plástico).</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">C. La energía cinética se conserva totalmente.</button>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="glass-card scroll-reveal">
+                <h3>Q2. ¿Qué variable relaciona la velocidad angular con la lineal?</h3>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">A. La Masa (m).</button>
+                <button class="quiz-option" onclick="checkAnswer(this, true)">B. El Radio (r).</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">C. La Gravedad (g).</button>
+                <div class="feedback"></div>
+            </div>
+        </section>
+
+        <section id="equipo">
+            <h2>04. Desarrolladores</h2>
+            <div class="team-grid scroll-reveal">
+                <div class="member">
+                    <h4>Regina Elorza</h4>
+                    <span>Ingeniería Industrial</span>
+                </div>
+                <div class="member">
+                    <h4>Jessica Anahí</h4>
+                    <span>Ingeniería Industrial</span>
+                </div>
+                <div class="member">
+                    <h4>Regina Rocha</h4>
+                    <span>Ingeniería Industrial</span>
+                </div>
+                <div class="member">
+                    <h4>Emmanuel Juárez</h4>
+                    <span>Ingeniería Industrial</span>
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align: center; color: var(--text-dim); padding: 50px 0; font-size: 0.8rem;">
+            <p>Diseñado & Construido para NexTech Industries © 2025</p>
+        </footer>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 1. SCROLL REVEAL (Aparición Dinámica)
+        ScrollReveal().reveal('.scroll-reveal', { 
+            delay: 200,
+            distance: '50px',
+            origin: 'bottom',
+            duration: 1000,
+            easing: 'cubic-bezier(0.5, 0, 0, 1)',
+            interval: 200 
+        });
+        
+        ScrollReveal().reveal('.hero h1', { delay: 300, origin: 'left', distance: '50px' });
+        ScrollReveal().reveal('.hero p', { delay: 500, origin: 'left', distance: '50px' });
+        ScrollReveal().reveal('.btn-main', { delay: 700, origin: 'bottom', distance: '20px' });
+
+        // 2. QUIZ INTERACTIVO
+        function checkAnswer(btn, isCorrect) {
+            const parent = btn.parentElement;
+            const feedback = parent.querySelector('.feedback');
+            
+            // Reset buttons
+            const allBtns = parent.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => {
+                b.style.opacity = '0.5';
+                b.style.pointerEvents = 'none';
+            });
+
+            btn.style.opacity = '1';
+
+            if(isCorrect) {
+                btn.classList.add('correct');
+                btn.innerHTML += ' ✅';
+                feedback.style.display = 'block';
+                feedback.style.color = '#64ffda';
+                feedback.innerHTML = '¡Correcto! Excelente comprensión del tema.';
+            } else {
+                btn.classList.add('wrong');
+                btn.innerHTML += ' ❌';
+                feedback.style.display = 'block';
+                feedback.style.color = '#ff6b6b';
+                feedback.innerHTML = 'Incorrecto. Intenta repasar la sección de teoría.';
+            }
+        }
+
+        // 3. GRÁFICA CHART.JS
+        const ctx = document.getElementById('collisionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Acero (e=0.9)', 'Madera (e=0.5)', 'Plástico (e=0.1)'],
+                datasets: [{
+                    label: '% Energía Conservada post-impacto',
+                    data: [90, 50, 10],
+                    backgroundColor: [
+                        'rgba(100, 255, 218, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 99, 132, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(100, 255, 218, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // 4. FONDO 3D (THREE.JS)
+        const scene = new THREE.Scene();
+        // Fondo transparente para ver el color CSS
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Partículas
+        const geometry = new THREE.BufferGeometry();
+        const count = 500;
+        const positions = new Float32Array(count * 3);
+        for(let i=0; i<count*3; i++) positions[i] = (Math.random()-0.5)*20;
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const material = new THREE.PointsMaterial({ size: 0.05, color: 0x64ffda });
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+        
+        camera.position.z = 5;
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            particles.rotation.y += 0.001;
+            particles.rotation.x += 0.0005;
+            
+            // Movimiento sutil con el mouse
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
